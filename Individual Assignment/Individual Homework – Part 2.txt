@@ -1,0 +1,41 @@
+CSE 308 Individual Homework, Part 2
+
+The goal of the individual homework is to get experience building a small web application before you begin designing your group project. 
+
+Part 2 will involve making two additions to the system you've built in Part 1. Please complete Part 1 and ensure it is working before trying to implement these changes.
+
+The completed homework will be due on Tuesday, September 17, 2019. 
+
+
+SUBMISSION INSTRUCTIONS
+
+You will be expected to demonstrate this project working on your local machine and also submit your code in a zip file on Blackboard. If you use alternative technologies, briefly state the steps to setup your environment and what OS you built it on in a README file.
+
+
+GRADING
+
+Part 1 and 2 will be worth a combined total of 10 points. You will get 5 points for completing all of the required functionality in Part 2.
+
+
+REQUIRED FUNCTIONALITY 
+
+All of the requirements for Part 1 and the following new requirements for Part 2:
+
+- For any contact, enable storing and viewing the "Contact Type". A "Contact Type" can be "Personal", "Work", "School", or "Other". 
+- For any contact, that contact can only have one "Contact Type" selected. Use radio buttons to take in and display the "Contact Type".
+
+
+For the second addition you can choose one of the following two features to implement. Choose whichever seems more helpful to your project or more interesting. 
+
+Option 1:
+- Enable the user to upload a profile picture for any contact.
+- Enable the user to see the profile picture of a contact when viewing that contact's details.
+
+To make this easier, you can have the system only work with images of one type (e.g. JPEG) and assume the image will be uploaded in the appropriate size. 
+
+
+Option 2: 
+- Enable authentication for the website, so that a user must log in to be able to see the contacts.
+- Use the OAuth framework to provide authentication: https://oauth.net/ 
+
+To make this easier, you can assume that if any user logs in, they see and edit the same list of contacts as any other logged in user.

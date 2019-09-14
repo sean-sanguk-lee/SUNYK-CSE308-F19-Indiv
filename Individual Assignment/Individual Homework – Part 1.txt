@@ -1,0 +1,767 @@
+CSE 308 Individual Homework, Part 1
+
+The goal of the individual homework is to get experience building a small web application before you begin designing your group project. 
+
+You can use any web technologies you desire to implement this project – this is a good opportunity to experiment with what you're planning for your group project. If you're unsure what to use, I would suggest Spring Boot, MongoDB (or MySQL if you want a relational database), and React.js. 
+
+This document also contains a tutorial for setting up the environment for developing Part 1 using the suggested technologies. Part 2 will involve making some additions to the system in Part 1 and will be posted later this week.
+
+The completed homework will be due on Tuesday, September 17, 2019. 
+
+
+SUBMISSION INSTRUCTIONS
+
+You will be expected to demonstrate this project working on your local machine and also submit your code in a zip file on Blackboard. If you use alternative technologies, briefly state the steps to setup your environment and what OS you built it on in a README file.
+
+
+GRADING
+
+Part 1 and 2 will be worth a combined total of 10 points. You will get 5 points for completing all of the required functionality in Part 1.
+
+
+REQUIRED FUNCTIONALITY
+
+This project is in two parts. Below are the requirements for part 1:
+
+
+Goal: Create a website that enables the user to create, edit, view, and delete contacts. These contacts are persisted and stored in a database.
+
+
+Functionality that must be implemented:
+
+View All Contacts:
+- User can view a list of all of their contacts, showing each contact's name and address.
+
+View Contact Info:
+- While viewing all their contacts, the user can select a contact to view all of that contact's information.
+
+Edit Contact Info:
+- While viewing a contact, the user can edit any of that contact's information. 
+
+Delete Contact: 
+- While viewing a contact, the user can delete that contact.
+
+
+You will need to create a model object representing a 'Contact' that will have the following properties:
+    - Name : String
+    - Address : String
+    - City : String
+    - Phone : String
+    - Email : String
+
+
+
+TUTORIAL
+
+Below are instructions for setting up your initial environment for a Spring Boot, MongoDB, and React.js Web Application. The tutorial is modeled off of:
+https://www.djamware.com/post/5ab6397c80aca714d19d5b9c/building-spring-boot-mongodb-and-reactjs-crud-web-application
+
+Unfortunately the online tutorial is a bit out of date and some parts are written in an unclear manner, but below I've written updated directions to get it working. The below instructions should be enough to get your project working, though it may be helpful to refer to the original tutorial as it contains screenshots and a different way of explaining things.
+
+Please note that these instructions are based on a Mac or Unix OS, if you are using Windows you will likely need to modify some parts where you install and setup different components.
+
+
+
+
+TROUBLESHOOTING TIPS
+
+If you are having trouble getting Part 1 to work properly, here are a few troubleshooting tips:
+
+You may need to re-run `./gradlew bootRun` and re-run `npm run build` every time you make changes to your code. 
+
+Check your command prompt for errors! Both of the above commands will give you good error messaging if there is a compilation issue with your code.
+
+Try out different browsers (e.g. Chrome, Safari, Firefox) — they will all have different behaviors, and one might give you better error messaging if something is wrong.
+
+
+
+
+
+INITIAL INSTALLS
+
+1. Install Java SE Development Kit 12 (Note: any Java Development Kit version 8 through 12 should work)
+
+   You can find this at: https://www.oracle.com/technetwork/java/javase/downloads/jdk12-downloads-5295953.html
+
+2. Install MongoDB – if you prefer MySQL or another database, feel free to use that instead and modify the database portions of the tutorial below as required.
+
+   Instructions for installing MongoDB Community Edition are here: https://docs.mongodb.com/manual/administration/install-community/
+
+
+
+
+
+SETTING UP SPRING BOOT PROJECT
+
+1. Go to the Spring Initializr site (https://start.spring.io) — this is where you will set up a new Java spring boot project.
+
+2. Select the following settings in Spring Initializr
+    - Project
+        - Whichever you prefer – I went with Gradle and the instructions below are building with Gradle.
+    - Language
+        - Java
+    - Spring Boot 
+        - 2.1.7
+    - Metadata: Group
+        - com.djamware (this will make it easier to copy/paste from the tutorial project, though you can feel free to change it if desired)
+    - Metadata: Artifact
+        - react
+    - Options: Java
+        - whichever version of Java you have installed. I used v12, though you will likely have the default, v8
+    - Dependencies
+        - Spring Web Starter
+        - Spring Data MongoDB (if you want to use MySQL or another database instead you don't need this dependency, but you'll have to figure out what dependencies you *do* need on your own.)
+
+3. Click the "Generate" button and the ready-made SpringBoot project will be downloaded. 
+
+4. Extract the generated project to your Java projects folder if you want to use a Java IDE to edit the code. You can also use a simple text editor if you wish.
+
+5. To connect Spring Boot with mongoDB, open and edit `src/main/java/resources/application.properties` and add the following lines:
+
+spring.data.mongodb.database=springreact
+spring.data.mongodb.host=localhost
+spring.data.mongodb.port=27017
+
+6. Now start MongoDB in the terminal or command line if it is not running already. 
+
+7. Test that everything has been successfully generated and connected by browsing to the react/ directory and running the following command (if you chose Maven as your build system, this command will be different):
+
+./gradlew bootRun
+
+** Note: If you do not have Gradle installed, you can download it here: https://gradle.org/install/ **
+
+>>>You should see an executing run window, probably with logging indicating your application has started. If you see errors, something went wrong with your setup.<<<
+
+
+ADDING JAVA BACKEND CODE
+
+1. Now that you have the project building and database connected, it's time to add your Java model object and supporting classes. Browse to `src/main/java/com/djamware/react` and create 3 new directories: 
+    - models
+    - controllers
+    - repositories
+
+2. Switch to the `models` directory and create a new file named `Contact.java`. This will be the base model for each "contact" in your application, and is mapped to the MongoDB collection with the name "contacts".
+
+3. Open the Contact.java file and add the following code (don't forget to save!):
+
+-------------------------------------------------------
+
+package com.djamware.react.models;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "contacts")
+public class Contact {
+    @Id
+    String id;
+    String name;
+    String address;
+    String city;
+    String phone;
+    String email;
+
+    public Contact() {
+    }
+
+    public Contact(String name, String address, String city, String phone, String email) {
+        this.name = name;
+        this.address = address;
+        this.city = city;
+        this.phone = phone;
+        this.email = email;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+} 
+
+-------------------------------------------------------
+
+4. Now browse to the /repositories directory and create a new (interface) file called `ContactRepository.java`. Open this file and add the following code:
+
+-------------------------------------------------------
+
+package com.djamware.react.repositories;
+
+import com.djamware.react.models.Contact;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ContactRepository extends CrudRepository<Contact, String> {
+    @Override
+    void delete(Contact deleted);
+}
+
+-------------------------------------------------------
+
+Note: You only need to add the `delete` function because other CRUD functions are handled by default by MongoDB's `CrudRepository`.
+
+5. Now browse to the /controllers directory and create a new file called `ContactController.java`. Open it and add the following code, which implements handling of requests and responses from your frontend to your backend:
+
+-------------------------------------------------------
+
+package com.djamware.react.controllers;
+
+import com.djamware.react.models.Contact;
+import com.djamware.react.repositories.ContactRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.Optional;
+
+@RestController
+public class ContactController {
+
+    @Autowired
+    ContactRepository contactRepository;
+
+    @RequestMapping(method=RequestMethod.GET, value="/contacts")
+    public Iterable<Contact> contact() {
+        return contactRepository.findAll();
+    }
+
+    @RequestMapping(method=RequestMethod.POST, value="/contacts")
+    public Contact save(@RequestBody Contact contact) {
+        contactRepository.save(contact);
+
+        return contact;
+    }
+
+    @RequestMapping(method=RequestMethod.GET, value="/contacts/{id}")
+    public Optional<Contact> show(@PathVariable String id) {
+        return contactRepository.findById(id);
+    }
+
+    @RequestMapping(method=RequestMethod.PUT, value="/contacts/{id}")
+    public Contact update(@PathVariable String id, @RequestBody Contact contact) {
+        Optional<Contact> optcontact = contactRepository.findById(id);
+        Contact c = optcontact.get();
+        if(contact.getName() != null)
+            c.setName(contact.getName());
+        if(contact.getAddress() != null)
+            c.setAddress(contact.getAddress());
+        if(contact.getCity() != null)
+            c.setCity(contact.getCity());
+        if(contact.getPhone() != null)
+            c.setPhone(contact.getPhone());
+        if(contact.getEmail() != null)
+            c.setEmail(contact.getEmail());
+        contactRepository.save(c);
+        return c;
+    }
+
+    @RequestMapping(method=RequestMethod.DELETE, value="/contacts/{id}")
+    public String delete(@PathVariable String id) {
+        Optional<Contact> optcontact = contactRepository.findById(id);
+        Contact contact = optcontact.get();
+        contactRepository.delete(contact);
+
+        return "";
+    }
+}
+
+-------------------------------------------------------
+
+6. Make sure all the files are saved! You will now test this backend implementation using CURL from the command line (if you're on Windows, you will likely need to install curl if you want to verify it with the below steps). Make sure you re-run your application since making changes (./gradlew bootRun or Maven equivalent from the root /react directory)
+
+7. Open a second terminal/command prompt window, and go through the following steps, checking to see if your responses match for each one:
+
+    // GET REQUEST [empty database]
+    Enter this at prompt:
+        curl -i -H "Accept: application/json" localhost:8080/contacts
+    Expected Response:
+        HTTP/1.1 200
+        Content-Type: application/json;charset=UTF-8
+        Transfer-Encoding: chunked
+        Date: Mon, 05 Feb 2018 12:14:39 GMT
+        []
+
+
+    // POST REQUEST
+    Enter this at prompt:
+        curl -i -X POST -H "Content-Type: application/json" -d '{"name":"John Doe","address":"123 Main Street","city":"Songdo","phone":"0123456789","email":"john.doe@example.com"}' localhost:8080/contacts
+    Expected Response:
+        HTTP/1.1 200
+        Content-Type: application/json;charset=UTF-8
+        Transfer-Encoding: chunked
+        Date: Tue, 06 Feb 2018 02:59:00 GMT
+        {"id":"5a7919f4b9d4f13c2cb6f539","name":"John Doe","address":"123 Main Street","city":"Seoul","phone":"0123456789","email":"john.doe@example.com"}
+
+
+** Note that the "id" returned on your machine will be different from this one. Make sure you enter the "id" that your machine returns for the next GET and PUT and DELETE requests **
+
+    // GET REQUEST [database with entry]
+    Enter this at prompt:
+        curl -i -H "Accept: application/json" localhost:8080/contacts/5a784bbfb9d4f121d9a31195
+    Expected Response:
+        HTTP/1.1 200
+        Content-Type: application/json;charset=UTF-8
+        Transfer-Encoding: chunked
+        Date: Mon, 05 Feb 2018 12:22:49 GMT
+        {"id":"5a7919f4b9d4f13c2cb6f539","name":"John Doe","address":"123 Main Street","city":"Seoul","phone":"0123456789","email":"john.doe@example.com"}
+
+
+    // PUT REQUEST
+    Enter this at prompt:
+        curl -i -X PUT -H "Content-Type: application/json" -d '{"name":"Susan Doe"}' localhost:8080/contacts/5a784bbfb9d4f121d9a31195
+    Expected Response:
+        HTTP/1.1 200
+        Content-Type: application/json;charset=UTF-8
+        Transfer-Encoding: chunked
+        Date: Sat, 24 Mar 2018 08:49:11 GMT
+        {"id":"5a784bbfb9d4f121d9a31195","name":"Susan Doe","address":"123 Main Street","city":"Seoul","phone":"0123456789","email":"john.doe@example.com"}
+
+
+    // DELETE REQUEST
+    Enter this at prompt:
+        curl -i -X DELETE localhost:8080/contacts/5a784bbfb9d4f121d9a31195
+    Expected Response:
+        HTTP/1.1 200
+        Content-Type: text/plain;charset=UTF-8
+        Content-Length: 0
+        Date: Sat, 24 Mar 2018 07:51:42 GMT
+
+>>>If you made it to this point successfully, great job! You have a working Java server and database! Now it's time to create the frontend of your application<<<
+
+
+
+
+
+CREATING AND CONFIGURING REACT PROJECT WITH SPRING BOOT
+
+** Note: If you do not already have Node.js installed, you will need it for the next steps. You can download it here: https://nodejs.org/en/ **
+
+1. You will now create a React.js application folder named 'frontend' which will house all of the .js and .css and other files needed for the frontend of your application. Browse to the root folder of your project and type the following command:
+
+create-react-app frontend
+
+** Note: If you do not have create-react-app installed, you may need to install it via the following command: `sudo npm install -g create-react-app` **
+
+2. To configure the React frontend to build with the Spring Boot backend, go into the /frontend folder and open `package.json`. Replace the `scripts` section with the following code:
+
+"scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && rm -rf ../src/main/resources/static && mv build ../src/main/resources/static",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+},
+
+3. Now, test your configuration. Kill your bootRun process (ctrl + c) and in a separate command prompt window, browse to the react/frontend directory and type the following command: 
+
+npm run build
+
+Then, in your bootRun terminal window, re-run the backend (from the /react directory) using 
+
+./gradlew bootRun
+
+Now, in the browser of your choice, navigate to `localhost:8080`, and you should see a "Welcome to React" homepage. Congrats! You have the main setup working, and now it's time to add some pages to this website.
+
+
+
+
+
+ADDING FRONTEND CODE AND UI
+
+1. Your final application will consist of a list of Contacts, a detail screen for each Contact, and the ability to create, edit, and delete Contacts. In order to navigate between components, you will need to create a Router object. You will use the react-router-dom React library to take care of this. To use that library, you need to install several packages. Browse to /frontend directory and enter the following commands:
+
+npm install --save react-router-dom
+npm install --save-dev bootstrap
+npm install --save axios
+
+2. Next, open /frontend/src/index.js and replace its contents with the following code:
+
+-------------------------------------------------------
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import App from './App';
+import './App.css';
+import Edit from './components/Edit';
+import Create from './components/Create';
+import Show from './components/Show';
+
+ReactDOM.render(
+  <Router>
+      <div>
+        <Route exact path='/' component={App} />
+        <Route path='/edit/:id' component={Edit} />
+        <Route path='/create' component={Create} />
+        <Route path='/show/:id' component={Show} />
+      </div>
+  </Router>,
+  document.getElementById('root')
+);
+
+-------------------------------------------------------
+
+3. Now open /frontend/src/App.js and replace its contents with the following code:
+
+-------------------------------------------------------
+
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+
+class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      contacts: []
+    };
+  }
+
+  componentDidMount() {
+    axios.get('/contacts')
+      .then(res => {
+        this.setState({ contacts: res.data });
+        console.log(this.state.contacts);
+      });
+  }
+
+  render() {
+    return (
+      <div class="container">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              CONTACTS LIST
+            </h3>
+          </div>
+          <div class="panel-body">
+            <h4><Link to="/create"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> Add Contact</Link></h4>
+            <table class="table table-stripe">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>City</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.contacts.map(c =>
+                  <tr>
+                    <td><Link to={`/show/${c.id}`}>{c.name}</Link></td>
+                    <td>{c.city}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default App;
+
+-------------------------------------------------------
+
+** Note: This retrieves the list of contacts from the database to display as a list on the main page of the application **
+
+4. Now, within the /frontend/src directory, create a new subdirectory called `components` and create 3 new files within that subdirectory:
+    - Create.js
+    - Show.js
+    - Edit.js
+
+5. Open the Create.js file and add the following code:
+
+-------------------------------------------------------
+
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+
+class Create extends Component {
+
+  constructor() {
+    super();
+    this.state = {
+      name: '',
+      address: '',
+      city: '',
+      phone: '',
+      email: ''
+    };
+  }
+  onChange = (e) => {
+    const state = this.state
+    state[e.target.name] = e.target.value;
+    this.setState(state);
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    const { name, address, city, phone, email } = this.state;
+
+    axios.post('/contacts', { name, address, city, phone, email })
+      .then((result) => {
+        this.props.history.push("/")
+      });
+  }
+
+  render() {
+    const { name, address, city, phone, email } = this.state;
+    return (
+      <div class="container">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              ADD CONTACT
+            </h3>
+          </div>
+          <div class="panel-body">
+            <h4><Link to="/"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Contacts List</Link></h4>
+            <form onSubmit={this.onSubmit}>
+              <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" value={name} onChange={this.onChange} placeholder="Name" />
+              </div>
+              <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" class="form-control" name="address" value={address} onChange={this.onChange} placeholder="Address" />
+              </div>
+              <div class="form-group">
+                <label for="city">City:</label>
+                <input type="text" class="form-control" name="city" value={city} onChange={this.onChange} placeholder="City" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="text" class="form-control" name="phone" value={phone} onChange={this.onChange} placeholder="Phone Number" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" name="email" value={email} onChange={this.onChange} placeholder="Email Address" />
+              </div>
+              <button type="submit" class="btn btn-default">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default Create;
+
+-------------------------------------------------------
+
+6. Now open Show.js and add the following code:
+
+-------------------------------------------------------
+
+import React, { Component } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+
+class Show extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      contact: {}
+    };
+  }
+
+  componentDidMount() {
+    axios.get('/contacts/'+this.props.match.params.id)
+      .then(res => {
+        this.setState({ contact: res.data });
+        console.log(this.state.contact);
+      });
+  }
+
+  delete(id){
+    console.log(id);
+    axios.delete('/contacts/'+id)
+      .then((result) => {
+        this.props.history.push("/")
+      });
+  }
+
+  render() {
+    return (
+      <div class="container">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              Contact Details
+            </h3>
+          </div>
+          <div class="panel-body">
+            <h4><Link to="/"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Contacts List</Link></h4>
+            <dl>
+              <dt>Name:</dt>
+              <dd>{this.state.contact.name}</dd>
+              <dt>Address:</dt>
+              <dd>{this.state.contact.address}</dd>
+              <dt>City:</dt>
+              <dd>{this.state.contact.city}</dd>
+              <dt>Phone Number:</dt>
+              <dd>{this.state.contact.phone}</dd>
+              <dt>Email Address:</dt>
+              <dd>{this.state.contact.email}</dd>
+            </dl>
+            <Link to={`/edit/${this.state.contact.id}`} class="btn btn-success">Edit</Link>&nbsp;
+            <button onClick={this.delete.bind(this, this.state.contact.id)} class="btn btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default Show;
+
+-------------------------------------------------------
+
+7. Finally, open Edit.js and add the following code:
+
+-------------------------------------------------------
+
+import React, { Component } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+
+class Edit extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      contact: {}
+    };
+  }
+
+  componentDidMount() {
+    axios.get('/contacts/'+this.props.match.params.id)
+      .then(res => {
+        this.setState({ contact: res.data });
+        console.log(this.state.contact);
+      });
+  }
+
+  onChange = (e) => {
+    const state = this.state.contact
+    state[e.target.name] = e.target.value;
+    this.setState({contact:state});
+  }
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    const { name, address, city, phone, email } = this.state.contact;
+
+    axios.put('/contacts/'+this.props.match.params.id, { name, address, city, phone, email })
+      .then((result) => {
+        this.props.history.push("/show/"+this.props.match.params.id)
+      });
+  }
+
+  render() {
+    return (
+      <div class="container">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">
+              EDIT Contact
+            </h3>
+          </div>
+          <div class="panel-body">
+            <h4><Link to={`/show/${this.state.contact.id}`}><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Contact List</Link></h4>
+            <form onSubmit={this.onSubmit}>
+              <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" name="name" value={this.state.contact.name} onChange={this.onChange} placeholder="Name" />
+              </div>
+              <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" class="form-control" name="address" value={this.state.contact.address} onChange={this.onChange} placeholder="Address" />
+              </div>
+              <div class="form-group">
+                <label for="city">City:</label>
+                <input type="text" class="form-control" name="city" value={this.state.contact.city} onChange={this.onChange} placeholder="City" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="text" class="form-control" name="phone" value={this.state.contact.phone} onChange={this.onChange} placeholder="Phone Number" />
+              </div>
+              <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" name="email" value={this.state.contact.email} onChange={this.onChange} placeholder="Email Address" />
+              </div>
+              <button type="submit" class="btn btn-default">Update</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default Edit;
+
+-------------------------------------------------------
+
+8. And that's it! You've just added all the basic JavaScript and HTML needed to make a basic web application! Save all your files and test it out. Kill the bootRun process again, and re-run (in the /frontend directory):
+
+npm run build
+
+Then re-run the backend using
+
+./gradlew bootRun
+
+And go to localhost:8080 in your browser. You should be able to see the web application you just created! You should be able to add, edit, and delete contacts, and those contacts should come back even after you kill the backend process and re-run it (since they should be saved to your database). That's it for Part 1 of the homework assignment, so now it's time to head to Part 2, where you will extend this application to do a few more things.
+
