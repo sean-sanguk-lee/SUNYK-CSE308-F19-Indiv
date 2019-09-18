@@ -53,6 +53,8 @@ public class ContactController
             c.setEmail(contact.getEmail());
         if(contact.getContactType() != null)
             c.setContactType(contact.getContactType());
+        if(contact.getProfileURL() != null)
+            c.setProfileURL(contact.getProfileURL());
 
         contactRepository.save(c);
         return c;

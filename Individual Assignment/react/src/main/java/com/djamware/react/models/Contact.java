@@ -9,7 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 //    PERSONAL, WORK, SCHOOL, OTHER
 //}
 
-public class Contact {
+public class Contact
+{
     @Id
     String id;
     String name;
@@ -18,11 +19,13 @@ public class Contact {
     String phone;
     String email;
     // Part 2
+    // @TODO Change type of contactType from String to Enum
     String contactType;
+    String profileURL;
 
     public Contact() {}
 
-    public Contact(String name, String address, String city, String phone, String email, String contactType)
+    public Contact(String name, String address, String city, String phone, String email, String contactType, String profileURL)
     {
         this.name = name;
         this.address = address;
@@ -30,6 +33,7 @@ public class Contact {
         this.phone = phone;
         this.email = email;
         this.contactType = contactType;
+        this.profileURL = profileURL;
     }
 
     public String getId()
@@ -47,15 +51,9 @@ public class Contact {
         return name;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
-    }
+    public void setName(String name) { this.name = name; }
 
-    public String getAddress()
-    {
-        return address;
-    }
+    public String getAddress() { return address; }
 
     public void setAddress(String address)
     {
@@ -100,5 +98,15 @@ public class Contact {
     public void setContactType(String contactType)
     {
         this.contactType = contactType;
+    }
+
+    public String getProfileURL()
+    {
+        return profileURL;
+    }
+
+    public void setProfileURL(String profileURL)
+    {
+        this.profileURL = profileURL;
     }
 }

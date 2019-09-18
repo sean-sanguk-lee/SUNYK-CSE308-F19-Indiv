@@ -43,6 +43,8 @@ class Show extends Component
                     <div class="panel-body">
                         <h4><Link to="/"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> Contacts List</Link></h4>
                         <dl>
+                            <dt>Profile Picture:</dt>
+                            <dd><img src={this.state.contact.profileURL}/></dd>
                             <dt>Name:</dt>
                             <dd>{this.state.contact.name}</dd>
                             <dt>Address:</dt>
